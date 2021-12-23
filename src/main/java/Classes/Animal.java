@@ -6,8 +6,9 @@ import Interfaces.IMapElement;
 import Interfaces.IWorldMap;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
-public class Animal implements IMapElement {
+public class Animal implements IMapElement, Comparable<Animal> {
     public MapDirection direction;
     public int energy;
     public Vector2d position;
@@ -22,6 +23,7 @@ public class Animal implements IMapElement {
     public Animal(IWorldMap map, Vector2d initialPosition) {
         this(map);
         this.position = initialPosition;
+        this.direction = this.direction.random();
     }
 
     public Animal(IWorldMap map, Vector2d position, int energy) {
@@ -29,13 +31,18 @@ public class Animal implements IMapElement {
         this.energy = energy;
     }
 
+    @Override
+    public Vector2d getPosition() {
+        return this.position;
+    }
+
     public void move(MoveDirection moveDirection) {
         switch(moveDirection) {
-            case LEFT:
-                this.direction = this.direction.previous();
-                break;
-            case RIGHT:
-                this.direction = this.direction.next();
+            case ROTATE:
+                int rotations = this.genes.chooseRandomGen();
+                for(int i = 0; i < rotations; i++) {
+                    this.direction = this.direction.next();
+                }
                 break;
             case FORWARD:
                 if(map.canMoveTo(this.position.add(direction.toUnitVector()))) {
@@ -45,17 +52,6 @@ public class Animal implements IMapElement {
                 if(map.canMoveTo(this.position.subtract(direction.toUnitVector()))) {
                     this.position = position.subtract(direction.toUnitVector());
                 }
-        }
-    }
-    @Override
-    public Vector2d getPosition() {
-        return this.position;
-    }
-
-    public void rotate() {
-        int rotations = this.genes.chooseRandomGen();
-        for(int i = 0; i < rotations; i++) {
-            this.move(MoveDirection.RIGHT);
         }
     }
 
@@ -74,7 +70,13 @@ public class Animal implements IMapElement {
         Animal child = new Animal(map, this.getPosition(), childEnergy);
         child.genes = new Genotype(this, otherParent);
         this.children.add(child);
+        otherParent.children.add(child);
 
         return child;
+    }
+
+    @Override
+    public int compareTo(Animal animal) {
+        return animal.energy - this.energy;
     }
 }

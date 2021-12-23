@@ -2,10 +2,10 @@ package Classes;
 
 import Interfaces.IMapElement;
 
-public class Grass implements IMapElement {
+public class Plant implements IMapElement {
     private Vector2d position;
 
-    public Grass(Vector2d grassPosition) {
+    public Plant(Vector2d grassPosition) {
         this.position = grassPosition;
     }
 
