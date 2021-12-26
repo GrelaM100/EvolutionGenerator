@@ -5,14 +5,13 @@ import Interfaces.IMapElement;
 public class Plant implements IMapElement {
     private Vector2d position;
 
-    public Plant(Vector2d grassPosition) {
-        this.position = grassPosition;
+    public Plant(Vector2d plantPosition) {
+        this.position = plantPosition;
     }
 
     public String toString() {
-        return "*";
+        return this.position.toString();
     }
-
 
     @Override
     public Vector2d getPosition() {

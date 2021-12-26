@@ -1,11 +1,10 @@
 package Classes;
 
-import java.util.Arrays;
 import java.util.Random;
 
 public class Genotype {
-    private int numberOfGens = 32;
-    private int availableGens = 8;
+    private final int numberOfGens = 32;
+    private final int availableGens = 8;
     public int[] genes = new int[numberOfGens];
 
     public Genotype() {
@@ -15,7 +14,7 @@ public class Genotype {
     public Genotype(Animal firstParent, Animal secondParent) {
         Animal strongerParent;
         Animal weakerParent;
-        if(firstParent.energy >= secondParent.energy) {
+        if(firstParent.getEnergy() >= secondParent.getEnergy()) {
             strongerParent = firstParent;
             weakerParent = secondParent;
         }
@@ -24,7 +23,7 @@ public class Genotype {
             weakerParent = firstParent;
         }
 
-        int dividePoint = (weakerParent.energy / (weakerParent.energy + strongerParent.energy)) - 1;
+        int dividePoint = (weakerParent.getEnergy() / (weakerParent.getEnergy() + strongerParent.getEnergy())) - 1;
         if(dividePoint < 0) {
             dividePoint = 0;
         }
@@ -32,10 +31,10 @@ public class Genotype {
         Random rand = new Random();
         int sideOfStronger = rand.nextInt(2);
         if(sideOfStronger == 0) {
-            this.genes = combineGens(strongerParent.genes, weakerParent.genes, dividePoint);
+            this.genes = combineGens(strongerParent.getGenes(), weakerParent.getGenes(), dividePoint);
         }
         else {
-            this.genes = combineGens(weakerParent.genes, strongerParent.genes, dividePoint);
+            this.genes = combineGens(weakerParent.getGenes(), strongerParent.getGenes(), dividePoint);
         }
     }
 

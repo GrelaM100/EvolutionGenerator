@@ -1,6 +1,5 @@
 package Interfaces;
 
-import Classes.Animal;
 import Classes.Vector2d;
 
 public interface IWorldMap {

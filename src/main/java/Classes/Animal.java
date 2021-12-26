@@ -6,35 +6,50 @@ import Interfaces.IMapElement;
 import Interfaces.IWorldMap;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.LinkedList;
 
 public class Animal implements IMapElement, Comparable<Animal> {
-    public MapDirection direction;
-    public int energy;
-    public Vector2d position;
-    public Genotype genes;
-    public IWorldMap map;
+    private MapDirection direction;
+    private int energy;
+    private Vector2d position;
+    private Genotype genes;
+    private IWorldMap map;
     public ArrayList<Animal> children = new ArrayList<>();
 
+    public Animal() {
+        this.direction = MapDirection.random();
+        this.genes = new Genotype();
+    }
     public Animal(IWorldMap map) {
+        this();
         this.map = map;
     }
 
-    public Animal(IWorldMap map, Vector2d initialPosition) {
+    public Animal(IWorldMap map, Vector2d initialPosition, int energy) {
         this(map);
         this.position = initialPosition;
-        this.direction = this.direction.random();
+        this.energy = energy;
     }
 
-    public Animal(IWorldMap map, Vector2d position, int energy) {
-        this(map, position);
-        this.energy = energy;
+    public Animal(IWorldMap map, Vector2d initialPosition, int energy, Genotype genotype) {
+        this(map, initialPosition, energy);
+        this.genes = genotype;
     }
 
     @Override
     public Vector2d getPosition() {
         return this.position;
     }
+
+    public int getEnergy() {
+        return this.energy;
+    }
+
+    public Genotype getGenes() {
+        return this.genes;
+    }
+
+    public MapDirection getDirection() {return this.direction; }
 
     public void move(MoveDirection moveDirection) {
         switch(moveDirection) {
@@ -48,10 +63,12 @@ public class Animal implements IMapElement, Comparable<Animal> {
                 if(map.canMoveTo(this.position.add(direction.toUnitVector()))) {
                     this.position = position.add(direction.toUnitVector());
                 }
+                break;
             case BACKWARD:
                 if(map.canMoveTo(this.position.subtract(direction.toUnitVector()))) {
                     this.position = position.subtract(direction.toUnitVector());
                 }
+                break;
         }
     }
 
@@ -62,13 +79,17 @@ public class Animal implements IMapElement, Comparable<Animal> {
         }
     }
 
-    public Animal copulate(Animal otherParent) {
+    public boolean canReproduce(int value) {
+        return this.getEnergy() >= 0.5 * value;
+    }
+
+    public Animal reproduce(Animal otherParent) {
         int childEnergy = (int) ((this.energy * 0.25) + (otherParent.energy * 0.25));
         this.changeEnergy((int) (-0.25 * this.energy));
-        otherParent.changeEnergy((int) (-0.25 * this.energy));
+        otherParent.changeEnergy((int) (-0.25 * otherParent.energy));
 
-        Animal child = new Animal(map, this.getPosition(), childEnergy);
-        child.genes = new Genotype(this, otherParent);
+        Genotype genes = new Genotype(this, otherParent);
+        Animal child = new Animal(map, this.getPosition(), childEnergy, genes);
         this.children.add(child);
         otherParent.children.add(child);
 
@@ -78,5 +99,11 @@ public class Animal implements IMapElement, Comparable<Animal> {
     @Override
     public int compareTo(Animal animal) {
         return animal.energy - this.energy;
+    }
+
+    @Override
+    public String toString() {
+        return "direction: " + this.direction.toString() + ", position: " + this.position.toString() + ", energy: " +
+                this.energy;
     }
 }

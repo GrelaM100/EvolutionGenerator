@@ -67,7 +67,7 @@ public enum MapDirection {
         };
     }
 
-    public MapDirection random() {
+    public static MapDirection random() {
         Random rand = new Random();
         int index = rand.nextInt(MapDirection.values().length);
         return MapDirection.values()[index];
