@@ -10,11 +10,14 @@ public class Plant implements IMapElement {
     }
 
     public String toString() {
-        return this.position.toString();
+        return "*";
     }
 
     @Override
     public Vector2d getPosition() {
         return this.position;
     }
+
+    @Override
+    public String getColor() {return "rgb(144,238,144)";}
 }

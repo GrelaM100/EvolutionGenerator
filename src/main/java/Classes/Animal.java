@@ -6,7 +6,6 @@ import Interfaces.IMapElement;
 import Interfaces.IWorldMap;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Animal implements IMapElement, Comparable<Animal> {
     private MapDirection direction;
@@ -14,6 +13,7 @@ public class Animal implements IMapElement, Comparable<Animal> {
     private Vector2d position;
     private Genotype genes;
     private IWorldMap map;
+    private int age = 0;
     public ArrayList<Animal> children = new ArrayList<>();
 
     public Animal() {
@@ -36,9 +36,34 @@ public class Animal implements IMapElement, Comparable<Animal> {
         this.genes = genotype;
     }
 
+    public int getAge() {return this.age;}
+
     @Override
     public Vector2d getPosition() {
         return this.position;
+    }
+
+    @Override
+    public String getColor() {
+        int startEnergy = ((MapWithBorders) this.map).startEnergy;
+        if(this.energy >= startEnergy) {
+            return "rgb(255,32,0)";
+        }
+        else if(this.energy >= 0.75 * startEnergy) {
+            return "rgb(255,103,0)";
+        }
+        else if(this.energy >= 0.5 * startEnergy) {
+            return "rgb(255,146,72)";
+        }
+        else if(this.energy >= 0.25 * startEnergy) {
+            return "rgb(255,179,138)";
+        }
+        else if(this.energy > 0) {
+            return "rgb(255,215,181)";
+        }
+        else {
+            return "rgb(255,255,255)";
+        }
     }
 
     public int getEnergy() {
@@ -96,6 +121,10 @@ public class Animal implements IMapElement, Comparable<Animal> {
         return child;
     }
 
+    public void increaseAge() {
+        this.age++;
+    }
+
     @Override
     public int compareTo(Animal animal) {
         return animal.energy - this.energy;
@@ -103,7 +132,6 @@ public class Animal implements IMapElement, Comparable<Animal> {
 
     @Override
     public String toString() {
-        return "direction: " + this.direction.toString() + ", position: " + this.position.toString() + ", energy: " +
-                this.energy;
+        return "A";
     }
 }

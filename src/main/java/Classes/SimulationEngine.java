@@ -1,16 +1,25 @@
 package Classes;
 
 import Interfaces.IEngine;
+import Interfaces.IMapObserver;
 import Interfaces.IWorldMap;
 
 import java.util.Random;
 
-public class SimulationEngine implements IEngine {
-    private MapWithBorders map;
+import static java.lang.Thread.sleep;
 
-    SimulationEngine(MapWithBorders map, int numberOfAnimals) {
+public class SimulationEngine implements IEngine, Runnable {
+    public MapWithBorders map;
+    public MapStatistics stats;
+    public int moveDelay;
+
+    public SimulationEngine(MapWithBorders map, int numberOfAnimals, int moveDelay, IMapObserver gui) {
         this.map = map;
         this.placeAnimalsOnMap(numberOfAnimals);
+        this.moveDelay = moveDelay;
+        this.stats = new MapStatistics(numberOfAnimals, this.map.plantsList.size(), this.map.startEnergy);
+        this.map.addObserver(gui);
+        this.map.addObserver(this.stats);
     }
 
     private void placeAnimalsOnMap(int numberOfAnimals) {
@@ -31,6 +40,12 @@ public class SimulationEngine implements IEngine {
             map.eat();
             map.reproduceAnimals();
             map.createPlants();
+            map.dayPassed();
+            try {
+                sleep(moveDelay);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

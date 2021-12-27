@@ -2,6 +2,7 @@ package Classes;
 
 import Enums.MoveDirection;
 import Interfaces.IMapElement;
+import Interfaces.IMapObserver;
 import Interfaces.IWorldMap;
 
 import java.util.*;
@@ -19,6 +20,9 @@ public class MapWithBorders implements IWorldMap {
     public LinkedList<Plant> plantsList = new LinkedList<>();
     public Vector2d jungleLeftLower;
     public Vector2d jungleRightUpper;
+    private int jungleWidth;
+    private int jungleHeight;
+    private List<IMapObserver> observers = new ArrayList<>();
 
 
     public MapWithBorders(int width, int height, int startEnergy, int moveEnergy, int plantEnergy, double jungleRatio) {
@@ -29,6 +33,7 @@ public class MapWithBorders implements IWorldMap {
         this.plantEnergy = plantEnergy;
         this.jungleRatio = jungleRatio;
         this.calculateJungleCorners();
+        this.createPlants();
     }
 
     @Override
@@ -68,15 +73,28 @@ public class MapWithBorders implements IWorldMap {
     public Object objectAt(Vector2d position) {
         LinkedList<Animal> tempList = this.animals.get(position);
         if(tempList == null || tempList.size() == 0) return this.plants.get(position);
-        else return tempList.getFirst();
+        else {
+            Collections.sort(tempList);
+            return tempList.getFirst();
+        }
+    }
+
+    public void addObserver(IMapObserver observer) {
+        this.observers.add(observer);
+    }
+
+    public void dayPassed() {
+        for(IMapObserver observer : this.observers) {
+            observer.dayPassed(this);
+        }
     }
 
     private void calculateJungleCorners() {
         Vector2d middlePoint = new Vector2d(this.width / 2, this.height / 2);
-        int jungleWidth = (int) (Math.sqrt(this.jungleRatio) * this.width);
-        int jungleHeight = (int) (Math.sqrt(this.jungleRatio) * this.height);
-        this.jungleLeftLower = middlePoint.subtract(new Vector2d(jungleWidth / 2, jungleHeight / 2));
-        this.jungleRightUpper = middlePoint.add(new Vector2d(jungleWidth / 2, jungleHeight / 2));
+        this.jungleWidth = (int) (Math.sqrt(this.jungleRatio) * this.width);
+        this.jungleHeight = (int) (Math.sqrt(this.jungleRatio) * this.height);
+        this.jungleLeftLower = middlePoint.subtract(new Vector2d(this.jungleWidth / 2, this.jungleHeight / 2));
+        this.jungleRightUpper = middlePoint.add(new Vector2d(this.jungleWidth / 2, this.jungleHeight / 2));
     }
 
     private void addAnimal(Vector2d position, Animal animalToAdd) {
@@ -102,6 +120,9 @@ public class MapWithBorders implements IWorldMap {
             if(animal.getEnergy() == 0) {
                 this.removeAnimal(animal);
                 this.animalsList.remove(animal);
+                for(IMapObserver observer : this.observers) {
+                    observer.animalDied(animal.getAge());
+                }
             }
         }
     }
@@ -114,6 +135,7 @@ public class MapWithBorders implements IWorldMap {
             animal.move(MoveDirection.values()[index]);
             animal.changeEnergy(-this.moveEnergy);
             this.addAnimal(animal.getPosition(), animal);
+            animal.increaseAge();
         }
     }
 
@@ -143,7 +165,8 @@ public class MapWithBorders implements IWorldMap {
     }
 
     public void eat() {
-        for(Plant plant : this.plantsList) {
+        LinkedList<Plant> tempList = (LinkedList<Plant>) this.plantsList.clone();
+        for(Plant plant : tempList) {
             LinkedList<Animal> animalsOnPlant = animals.get(plant.getPosition());
             if(animalsOnPlant == null || animalsOnPlant.size() == 0) {
                 continue;
@@ -152,6 +175,8 @@ public class MapWithBorders implements IWorldMap {
             for(Animal animal : strongestAnimals) {
                 animal.changeEnergy(this.plantEnergy / strongestAnimals.size());
             }
+            this.plantsList.remove(plant);
+            this.plants.remove(plant.getPosition());
         }
     }
 
@@ -170,15 +195,15 @@ public class MapWithBorders implements IWorldMap {
         }
     }
 
-    private boolean isInJungle(Vector2d point) {
+    public boolean isInJungle(Vector2d point) {
         return point.precedes(this.jungleRightUpper) && point.follows(this.jungleLeftLower);
     }
 
-    private void createPlantOnRandomField(Vector2d lowerLeft, Vector2d upperRight, boolean isJungle) {
+    private boolean createPlantOnRandomField(Vector2d lowerLeft, Vector2d upperRight, boolean isJungle) {
         Random rand = new Random();
         int counter = 0;
         int area = (upperRight.x - lowerLeft.x + 1) * (upperRight.y - lowerLeft.y + 1);
-        while(counter < 2 * area) {
+        while(counter < area) {
             int randomX = rand.nextInt(upperRight.x - lowerLeft.x + 1) + lowerLeft.x;
             int randomY = rand.nextInt(upperRight.y - lowerLeft.y + 1) + lowerLeft.y;
             Vector2d randomPosition = new Vector2d(randomX, randomY);
@@ -190,14 +215,41 @@ public class MapWithBorders implements IWorldMap {
             }
             Plant plant = new Plant(randomPosition);
             if(this.place(plant)) {
-                return;
+                return true;
             }
             counter++;
+        }
+        return false;
+    }
+
+    private void fillFirstFreeField(Vector2d lowerLeft, Vector2d upperRight) {
+        for(int i = lowerLeft.x; i < upperRight.x + 1; i++) {
+            for(int j = lowerLeft.y; j < upperRight.y + 1; j++) {
+                if(this.place(new Plant(new Vector2d(i, j)))) {
+                    return;
+                }
+            }
+        }
+    }
+
+    private void createPlantOnMap(boolean isJungle) {
+        boolean isPlanted;
+        if(isJungle) {
+            isPlanted = this.createPlantOnRandomField(this.jungleLeftLower, this.jungleRightUpper, true);
+            if(!isPlanted) {
+                this.fillFirstFreeField(this.jungleLeftLower, this.jungleRightUpper);
+            }
+        }
+        else {
+            isPlanted = this.createPlantOnRandomField(new Vector2d(0, 0), new Vector2d(this.width - 1, this.height - 1), false);
+            if(!isPlanted) {
+                this.fillFirstFreeField(new Vector2d(0, 0), new Vector2d(this.width - 1, this.height - 1));
+            }
         }
     }
 
     public void createPlants() {
-        this.createPlantOnRandomField(this.jungleLeftLower, this.jungleRightUpper, true);
-        this.createPlantOnRandomField(new Vector2d(0, 0), new Vector2d(this.width - 1, this.height - 1), false);
+        createPlantOnMap(true);
+        createPlantOnMap(false);
     }
 }
