@@ -12,6 +12,9 @@ public class SimulationEngine implements IEngine, Runnable {
     public MapWithBorders map;
     public MapStatistics stats;
     public int moveDelay;
+    private boolean running = true;
+    private boolean paused = false;
+    private final Object pauseLock = new Object();
 
     public SimulationEngine(MapWithBorders map, int numberOfAnimals, int moveDelay, IMapObserver gui) {
         this.map = map;
@@ -34,18 +37,52 @@ public class SimulationEngine implements IEngine, Runnable {
 
     @Override
     public void run() {
-        while(true) {
-            map.removeDeadAnimals();
-            map.moveAnimals();
-            map.eat();
-            map.reproduceAnimals();
-            map.createPlants();
-            map.dayPassed();
-            try {
-                sleep(moveDelay);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        while(this.running) {
+            synchronized (this.pauseLock) {
+                if(!this.running) {
+                    break;
+                }
+                if(this.paused) {
+                    try {
+                        synchronized (this.pauseLock) {
+                            this.pauseLock.wait();
+                        }
+                    }
+                    catch(InterruptedException ex) {
+                        break;
+                    }
+                    if(!this.running) {
+                        break;
+                    }
+                }
+                map.removeDeadAnimals(this.stats.day);
+                map.moveAnimals();
+                map.eat();
+                map.reproduceAnimals();
+                map.createPlants();
+                map.dayPassed();
+                try {
+                    sleep(moveDelay);
+                } catch (InterruptedException e) {
+                    break;
+                }
             }
+        }
+    }
+
+    public void stop() {
+        running = false;
+        this.resume();
+    }
+
+    public void pause() {
+        paused = true;
+    }
+
+    public void resume() {
+        synchronized (pauseLock) {
+            paused = false;
+            pauseLock.notifyAll();
         }
     }
 }

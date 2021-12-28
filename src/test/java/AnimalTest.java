@@ -1,5 +1,4 @@
 import Classes.Animal;
-import Classes.Genotype;
 import Classes.MapWithBorders;
 import Classes.Vector2d;
 import Enums.MoveDirection;
@@ -19,7 +18,7 @@ public class AnimalTest {
         Animal animal = new Animal(map, position, 100);
         assertEquals(animal.getPosition(), position);
         assertEquals(animal.getEnergy(), energy);
-        assertNotNull(animal.getGenes());
+        assertNotNull(animal.getGenotype());
     }
 
     @Test

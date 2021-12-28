@@ -6,19 +6,22 @@ import Interfaces.IMapElement;
 import Interfaces.IWorldMap;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class Animal implements IMapElement, Comparable<Animal> {
     private MapDirection direction;
     private int energy;
     private Vector2d position;
-    private Genotype genes;
+    private Genotype genotype;
     private IWorldMap map;
     private int age = 0;
+    private int dayOfDeath = 0;
     public ArrayList<Animal> children = new ArrayList<>();
+    public ArrayList<Animal> trackedChildren;
 
     public Animal() {
         this.direction = MapDirection.random();
-        this.genes = new Genotype();
+        this.genotype = new Genotype();
     }
     public Animal(IWorldMap map) {
         this();
@@ -33,7 +36,7 @@ public class Animal implements IMapElement, Comparable<Animal> {
 
     public Animal(IWorldMap map, Vector2d initialPosition, int energy, Genotype genotype) {
         this(map, initialPosition, energy);
-        this.genes = genotype;
+        this.genotype = genotype;
     }
 
     public int getAge() {return this.age;}
@@ -70,16 +73,22 @@ public class Animal implements IMapElement, Comparable<Animal> {
         return this.energy;
     }
 
-    public Genotype getGenes() {
-        return this.genes;
+    public Genotype getGenotype() {
+        return this.genotype;
     }
 
     public MapDirection getDirection() {return this.direction; }
 
+    public void setDayOfDeath(int dayOfDeath) {
+        this.dayOfDeath = dayOfDeath;
+    }
+    public int getDayOfDeath() {
+        return this.dayOfDeath;
+    }
     public void move(MoveDirection moveDirection) {
         switch(moveDirection) {
             case ROTATE:
-                int rotations = this.genes.chooseRandomGen();
+                int rotations = this.genotype.chooseRandomGen();
                 for(int i = 0; i < rotations; i++) {
                     this.direction = this.direction.next();
                 }
@@ -116,9 +125,33 @@ public class Animal implements IMapElement, Comparable<Animal> {
         Genotype genes = new Genotype(this, otherParent);
         Animal child = new Animal(map, this.getPosition(), childEnergy, genes);
         this.children.add(child);
+        if(this.trackedChildren != null) {
+            this.trackedChildren.add(child);
+        }
         otherParent.children.add(child);
 
         return child;
+    }
+
+    public void track() {
+        this.trackedChildren = new ArrayList<>();
+    }
+
+    public int calculateDescendant(Animal currentAnimal) {
+        if(currentAnimal.children.size() == 0) return 0;
+        else {
+            int sum;
+            if(currentAnimal == this) {
+                sum = currentAnimal.trackedChildren.size();
+            }
+            else {
+                sum = currentAnimal.children.size();
+            }
+            for(Animal child : currentAnimal.children) {
+                sum += calculateDescendant(child);
+            }
+            return sum;
+        }
     }
 
     public void increaseAge() {

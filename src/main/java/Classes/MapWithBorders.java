@@ -114,12 +114,13 @@ public class MapWithBorders implements IWorldMap {
         }
     }
 
-    public void removeDeadAnimals() {
+    public void removeDeadAnimals(int day) {
         LinkedList<Animal> tempList = (LinkedList<Animal>) this.animalsList.clone();
         for(Animal animal : tempList) {
             if(animal.getEnergy() == 0) {
                 this.removeAnimal(animal);
                 this.animalsList.remove(animal);
+                animal.setDayOfDeath(day);
                 for(IMapObserver observer : this.observers) {
                     observer.animalDied(animal.getAge());
                 }

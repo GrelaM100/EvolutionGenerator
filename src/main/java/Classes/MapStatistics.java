@@ -2,6 +2,8 @@ package Classes;
 
 import Interfaces.IMapObserver;
 
+import java.util.*;
+
 public class MapStatistics implements IMapObserver{
     public int day;
     public int numberOfAnimals;
@@ -9,6 +11,7 @@ public class MapStatistics implements IMapObserver{
     public float averageEnergy;
     public float averageLifeLength;
     public float averageNumberOfChildren;
+    public Genotype dominantGenotype;
     private int numberOfDeadAnimals;
     private int sumOfAges;
 
@@ -43,7 +46,26 @@ public class MapStatistics implements IMapObserver{
             this.averageEnergy = 0;
             this.averageNumberOfChildren = 0;
         }
+
+        this.getDominantGenotype(map.animalsList);
     }
+
+    private void getDominantGenotype(LinkedList<Animal> animals) {
+        int frequency = 0;
+        List<Genotype> genotypesToCheck = new LinkedList<>();
+        for(Animal animal : animals) {
+            genotypesToCheck.add(animal.getGenotype());
+        }
+        for(Genotype genotype : genotypesToCheck) {
+            int currentFrequency = Collections.frequency(genotypesToCheck, genotype);
+            if(currentFrequency > frequency) {
+                this.dominantGenotype = genotype;
+                frequency = currentFrequency;
+            }
+        }
+
+    }
+
 
     @Override
     public String toString() {
