@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AnimalTest {
-    private final IWorldMap map = new MapWithBorders(5, 5, 100, 10, 20, 0.3);
+    private final IWorldMap map = new MapWithBorders(5, 5, 100, 10, 20, 0.3, false);
 
 
     @Test

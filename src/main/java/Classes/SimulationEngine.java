@@ -9,18 +9,18 @@ import java.util.Random;
 import static java.lang.Thread.sleep;
 
 public class SimulationEngine implements IEngine, Runnable {
-    public MapWithBorders map;
+    public IWorldMap map;
     public MapStatistics stats;
     public int moveDelay;
     private boolean running = true;
     private boolean paused = false;
     private final Object pauseLock = new Object();
 
-    public SimulationEngine(MapWithBorders map, int numberOfAnimals, int moveDelay, IMapObserver gui) {
+    public SimulationEngine(IWorldMap map, int numberOfAnimals, int moveDelay, IMapObserver gui) {
         this.map = map;
         this.placeAnimalsOnMap(numberOfAnimals);
         this.moveDelay = moveDelay;
-        this.stats = new MapStatistics(numberOfAnimals, this.map.plantsList.size(), this.map.startEnergy);
+        this.stats = new MapStatistics(numberOfAnimals, this.map.getPlantsList().size(), this.map.getStartEnergy());
         this.map.addObserver(gui);
         this.map.addObserver(this.stats);
     }
@@ -29,8 +29,9 @@ public class SimulationEngine implements IEngine, Runnable {
         Random rand = new Random();
         for(int i = 0; i < numberOfAnimals; i++) {
 
-            Animal animal = new Animal(this.map, new Vector2d(rand.nextInt(this.map.width), rand.nextInt(this.map.height)),
-                    this.map.startEnergy);
+            Animal animal = new Animal(this.map, new Vector2d(rand.nextInt(this.map.getWidth()),
+                    rand.nextInt(this.map.getHeight())),
+                    this.map.getStartEnergy());
             this.map.place(animal);
         }
     }

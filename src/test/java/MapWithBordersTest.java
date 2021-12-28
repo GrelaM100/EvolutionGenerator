@@ -11,7 +11,7 @@ public class MapWithBordersTest {
 
     @BeforeEach
     public void initialize() {
-        map = new MapWithBorders(10, 10, 100, 10, 20, 0.5);
+        map = new MapWithBorders(10, 10, 100, 10, 20, 0.5, false);
     }
 }
 

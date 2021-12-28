@@ -6,7 +6,6 @@ import Interfaces.IMapElement;
 import Interfaces.IWorldMap;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Animal implements IMapElement, Comparable<Animal> {
     private MapDirection direction;
@@ -48,7 +47,7 @@ public class Animal implements IMapElement, Comparable<Animal> {
 
     @Override
     public String getColor() {
-        int startEnergy = ((MapWithBorders) this.map).startEnergy;
+        int startEnergy = this.map.getStartEnergy();
         if(this.energy >= startEnergy) {
             return "rgb(255,32,0)";
         }
@@ -82,10 +81,17 @@ public class Animal implements IMapElement, Comparable<Animal> {
     public void setDayOfDeath(int dayOfDeath) {
         this.dayOfDeath = dayOfDeath;
     }
+
     public int getDayOfDeath() {
         return this.dayOfDeath;
     }
+
+    public void setPosition(Vector2d position) {
+        this.position = position;
+    }
+
     public void move(MoveDirection moveDirection) {
+        Vector2d newPosition;
         switch(moveDirection) {
             case ROTATE:
                 int rotations = this.genotype.chooseRandomGen();
@@ -94,16 +100,44 @@ public class Animal implements IMapElement, Comparable<Animal> {
                 }
                 break;
             case FORWARD:
-                if(map.canMoveTo(this.position.add(direction.toUnitVector()))) {
-                    this.position = position.add(direction.toUnitVector());
+                 newPosition = this.position.add(direction.toUnitVector());
+                if(map.canMoveTo(newPosition)) {
+                    if(this.map instanceof MapNoBorders) {
+                        newPosition = teleportWithNoBorder(newPosition);
+                    }
+                    this.position = newPosition;
                 }
                 break;
             case BACKWARD:
-                if(map.canMoveTo(this.position.subtract(direction.toUnitVector()))) {
-                    this.position = position.subtract(direction.toUnitVector());
+                newPosition = this.position.subtract(direction.toUnitVector());
+                if(map.canMoveTo(newPosition)) {
+                    if(this.map instanceof MapNoBorders) {
+                        newPosition = teleportWithNoBorder(newPosition);
+                    }
+                    this.position = newPosition;
                 }
                 break;
         }
+    }
+
+    private Vector2d teleportWithNoBorder(Vector2d position) {
+        int x = position.x;
+        int y = position.y;
+
+        if(position.x < 0) {
+            x = this.map.getWidth() - 1;
+        }
+        if(position.x >= this.map.getWidth()) {
+            x = 0;
+        }
+        if(position.y < 0) {
+            y = this.map.getHeight() - 1;
+        }
+        if(position.y >= this.map.getHeight()) {
+            y = 0;
+        }
+
+        return new Vector2d(x, y);
     }
 
     public void changeEnergy(int value) {
