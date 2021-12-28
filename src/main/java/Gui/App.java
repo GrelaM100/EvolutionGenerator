@@ -36,7 +36,7 @@ public class App extends Application {
         VBox menu = new VBox(3, widthHbox, heightHbox, numberOfAnimalsHbox, startEnergyHbox, moveEnergyHbox, planEnergyHbox,
                 jungleRatioHbox, reproduceBorders, reproduceNoBorders, moveDelayHbox, startButton);
         menu.setAlignment(Pos.BASELINE_RIGHT);
-        this.stage.setScene(new Scene(menu, 450, 300));
+        this.stage.setScene(new Scene(menu, 450, 320));
 
         startButton.setOnAction(action -> {
             try {
