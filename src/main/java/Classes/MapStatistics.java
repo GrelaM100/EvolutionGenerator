@@ -80,7 +80,7 @@ public class MapStatistics implements IMapObserver{
         float[] averageValues = new float[]{0, 0, 0, 0, 0};
         int daysEveryAnimalAlive = 0;
 
-        try(PrintWriter writer = new PrintWriter(filename)) {
+        try(PrintWriter writer = new PrintWriter(filename+".csv")) {
             StringBuilder sb = new StringBuilder();
             String columnNames = "Epoka,Liczba zwierząt,Liczba roślin,Średnia energia," +
                     "Średnia długość życia,Średnia ilość dzieci\n";
