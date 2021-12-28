@@ -5,6 +5,10 @@ Autor: Michał Grela\
 Grupa: 15, czwartek godz. 14:40 - 16:10, Informatyka - Data Science\
 Udało się zaimplementować wszystkie wymagania projektu
 
+# Uruchamianie
+Linux - `./gradlew run` \
+Windows - `.\gradlew.bat run`
+
 # Opis działania
 ## Menu startu
 Poczatkowo użytkownikowi pokazuje się **menu startu** umożliwiające zmianę parametrów map.
