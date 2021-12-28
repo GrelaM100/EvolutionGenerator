@@ -28,7 +28,7 @@ public class MapStatistics implements IMapObserver{
         this.numberOfDeadAnimals = 0;
         this.sumOfAges = 0;
         this.averageLifeLength = 0;
-        this.statisticsHistory.add(new float[] {0, this.numberOfDeadAnimals, this.numberOfPlants,
+        this.statisticsHistory.add(new float[] {0, this.numberOfAnimals, this.numberOfPlants,
                 startEnergy, 0, averageNumberOfChildren});
     }
 
@@ -77,9 +77,12 @@ public class MapStatistics implements IMapObserver{
     }
 
     public void saveToCSV(String filename) {
+        float[] averageValues = new float[]{0, 0, 0, 0, 0};
+        int daysEveryAnimalAlive = 0;
+
         try(PrintWriter writer = new PrintWriter(filename)) {
             StringBuilder sb = new StringBuilder();
-            String columnNames = "Dzień,Liczba zwierząt,Liczba roślin,Średnia energia," +
+            String columnNames = "Epoka,Liczba zwierząt,Liczba roślin,Średnia energia," +
                     "Średnia długość życia,Średnia ilość dzieci\n";
             sb.append(columnNames);
             for(float[] dayData : this.statisticsHistory) {
@@ -87,13 +90,31 @@ public class MapStatistics implements IMapObserver{
                     if(i < 3) {
                         sb.append((int) dayData[i]);
                     }
-                    else {
+                    else if (i == 4 && dayData[i] == 0) {
+                        sb.append(",");
+                        daysEveryAnimalAlive++;
+                        continue;
+                    } else {
                         sb.append(dayData[i]);
                     }
                     sb.append(',');
+                    if(i != 0) {
+                        averageValues[i - 1] += dayData[i];
+                    }
                 }
                 sb.append('\n');
             }
+            sb.append("Średnia:,");
+            for(int i = 0; i < averageValues.length; i++) {
+                if(i == 3) {
+                    sb.append(averageValues[i] / (this.statisticsHistory.size() - daysEveryAnimalAlive));
+                }
+                else {
+                    sb.append(averageValues[i] / this.statisticsHistory.size());
+                }
+                sb.append(",");
+            }
+            sb.append("\n");
             writer.write(sb.toString());
         } catch (FileNotFoundException e) {
             System.out.println(e.getMessage());

@@ -39,32 +39,39 @@ public class App extends Application {
         this.stage.setScene(new Scene(menu, 450, 300));
 
         startButton.setOnAction(action -> {
-            int width = Integer.parseInt(getTextFromMenu(0, menu));
-            int height = Integer.parseInt(getTextFromMenu(1, menu));
-            int numberOfAnimals = Integer.parseInt(getTextFromMenu(2, menu));
-            int startEnergy = Integer.parseInt(getTextFromMenu(3, menu));
-            int moveEnergy = Integer.parseInt(getTextFromMenu(4, menu));
-            int plantEnergy = Integer.parseInt(getTextFromMenu(5, menu));
-            double jungleRation = Double.parseDouble(getTextFromMenu(6, menu));
-            boolean evolutionMethodBorders = getFromChoiceBox(7, menu);
-            boolean evolutionMethodNoBorders = getFromChoiceBox(8, menu);
-            int moveDelay = Integer.parseInt(getTextFromMenu(9, menu));
-            IWorldMap mapBorders = new MapWithBorders(width, height, startEnergy, moveEnergy, plantEnergy, jungleRation, evolutionMethodBorders);
-            IWorldMap mapNoBorders = new MapNoBorders(width, height, startEnergy, moveEnergy, plantEnergy, jungleRation, evolutionMethodNoBorders);
-            MapGui mapBordersGui = new MapGui(mapBorders, numberOfAnimals, moveDelay, "Mapa z murem");
-            MapGui mapNoBordersGui = new MapGui(mapNoBorders, numberOfAnimals, moveDelay, "Mapa zawinięta");
-            HBox main = new HBox(10, mapBordersGui.combinedView, mapNoBordersGui.combinedView);
-            Scene scene = new Scene(main, 2100, 600);
-            this.stage.setScene(scene);
+            try {
+                int width = Integer.parseInt(getTextFromMenu(0, menu));
+                int height = Integer.parseInt(getTextFromMenu(1, menu));
+                int numberOfAnimals = Integer.parseInt(getTextFromMenu(2, menu));
+                int startEnergy = Integer.parseInt(getTextFromMenu(3, menu));
+                int moveEnergy = Integer.parseInt(getTextFromMenu(4, menu));
+                int plantEnergy = Integer.parseInt(getTextFromMenu(5, menu));
+                double jungleRation = Double.parseDouble(getTextFromMenu(6, menu));
+                boolean evolutionMethodBorders = getFromChoiceBox(7, menu);
+                boolean evolutionMethodNoBorders = getFromChoiceBox(8, menu);
+                int moveDelay = Integer.parseInt(getTextFromMenu(9, menu));
+                IWorldMap mapBorders = new MapWithBorders(width, height, startEnergy, moveEnergy, plantEnergy, jungleRation, evolutionMethodBorders);
+                IWorldMap mapNoBorders = new MapNoBorders(width, height, startEnergy, moveEnergy, plantEnergy, jungleRation, evolutionMethodNoBorders);
+                MapGui mapBordersGui = new MapGui(mapBorders, numberOfAnimals, moveDelay, "Mapa z murem");
+                MapGui mapNoBordersGui = new MapGui(mapNoBorders, numberOfAnimals, moveDelay, "Mapa zawinięta");
+                HBox main = new HBox(10, mapBordersGui.combinedView, mapNoBordersGui.combinedView);
+                Scene scene = new Scene(main, 2100, 650);
+                this.stage.setScene(scene);
 
-            Thread engineThread1 = new Thread(mapBordersGui.engine);
-            Thread engineThread2 = new Thread(mapNoBordersGui.engine);
-            engineThread1.start();
-            engineThread2.start();
-            this.stage.setOnCloseRequest(event -> {
-                mapBordersGui.engine.stop();
-                mapNoBordersGui.engine.stop();
-            });
+                Thread engineThread1 = new Thread(mapBordersGui.engine);
+                Thread engineThread2 = new Thread(mapNoBordersGui.engine);
+                engineThread1.start();
+                engineThread2.start();
+                this.stage.setOnCloseRequest(event -> {
+                    mapBordersGui.engine.stop();
+                    mapNoBordersGui.engine.stop();
+                });
+            } catch(NumberFormatException exception) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setContentText("Proszę podać dane w poprawnym formacie");
+                alert.show();
+            }
+
         });
     }
 

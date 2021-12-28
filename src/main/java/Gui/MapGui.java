@@ -115,7 +115,7 @@ public class MapGui implements IMapObserver {
     private LineChart<Number, Number> setChart(XYChart.Series<Number, Number> series) {
         NumberAxis xAxis, yAxis;
         xAxis = new NumberAxis();
-        xAxis.setLabel("Dzień");
+        xAxis.setLabel("Epoka");
         xAxis.setForceZeroInRange(false);
 
         yAxis = new NumberAxis();
@@ -180,10 +180,11 @@ public class MapGui implements IMapObserver {
     private void pauseSimulation() {
         this.isPaused = true;
         this.engine.pause();
-        this.engine.stats.saveToCSV(this.name.replace(" ", "")+"Statystyki");
         Button button = (Button) ((VBox) this.combinedView.getChildren().get(1)).getChildren().get(2);
         Button showAllWithDominantGenotype = new Button("Pokaż zwierzęta z domiującym genotypem");
+        Button saveMapStats = new Button("Zapisz statystyki mapy");
         ((VBox) this.combinedView.getChildren().get(1)).getChildren().add(showAllWithDominantGenotype);
+        ((VBox) this.combinedView.getChildren().get(1)).getChildren().add(saveMapStats);
         button.setText(">");
         showAllWithDominantGenotype.setOnAction(event -> {
             VBox animalsInformation = new VBox(5);
@@ -205,12 +206,14 @@ public class MapGui implements IMapObserver {
             stage.setTitle(this.name);
             stage.show();
         });
+        saveMapStats.setOnAction(event -> this.engine.stats.saveToCSV(this.name.replace(" ", "")+"Statystyki"));
     }
 
     private void continueSimulation() {
         this.isPaused = false;
         this.engine.resume();
         Button button = (Button) ((VBox) this.combinedView.getChildren().get(1)).getChildren().get(2);
+        ((VBox) this.combinedView.getChildren().get(1)).getChildren().remove(4);
         ((VBox) this.combinedView.getChildren().get(1)).getChildren().remove(3);
         button.setText("||");
     }
@@ -302,7 +305,7 @@ public class MapGui implements IMapObserver {
     public void magicHappened() {
         Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setContentText("Zwierzęta wyewoluowały w sposób magiczny: (" + this.name + ")");
+            alert.setContentText("Zwierzęta wyewoluowały w sposób magiczny: " + this.name);
             alert.show();
         });
     }
