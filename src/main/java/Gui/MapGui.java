@@ -25,23 +25,20 @@ import java.util.ArrayList;
 public class MapGui implements IMapObserver {
     public SimulationEngine engine;
     private boolean isPaused = false;
-    private int stageWidth = 500;
-    private int stageHeight = 500;
     private GridPane mapGrid;
-    private ArrayList<XYChart.Series<Number, Number>> xYSeries = new ArrayList<>();
-    private ArrayList<XYChart<Number, Number>> charts = new ArrayList<>();
+    private final ArrayList<XYChart.Series<Number, Number>> xYSeries = new ArrayList<>();
+    private final ArrayList<XYChart<Number, Number>> charts = new ArrayList<>();
 
     private Animal trackedAnimal = null;
     private VBox trackedAnimalVBox;
-    private String name;
-    private Alert alert;
+    private final String name;
 
     public HBox combinedView;
 
 
     public MapGui(IWorldMap map, int numberOfAnimals, int moveDelay, String name) {
         this.name = name;
-        this.alert = new Alert(Alert.AlertType.INFORMATION);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setContentText("Zwierzęta magicznie wyewoluowały na mapie (" + this.name + ")");
         this.engine = new SimulationEngine(map, numberOfAnimals, moveDelay, this);
         this.preparePlots();
@@ -55,8 +52,10 @@ public class MapGui implements IMapObserver {
         GridPane gridPane = this.mapGrid;
         int width = engine.map.getWidth();
         int height = engine.map.getHeight();
-        int columnSize = this.stageWidth / (width + 1);
-        int rowSize = this.stageHeight / (height + 1);
+        int stageWidth = 500;
+        int columnSize = stageWidth / (width + 1);
+        int stageHeight = 500;
+        int rowSize = stageHeight / (height + 1);
         Label currentLabel;
 
         for(int i = 0; i < height + 1; i++) {
@@ -217,25 +216,23 @@ public class MapGui implements IMapObserver {
     }
 
     public void clickGrid() {
-        this.mapGrid.getChildren().forEach(item -> {
-            item.setOnMouseClicked(event -> {
-                if(this.isPaused) {
-                    Node clickedNode = event.getPickResult().getIntersectedNode();
-                    Node parent = clickedNode.getParent();
-                    while(parent != this.mapGrid) {
-                        clickedNode = parent;
-                        parent = clickedNode.getParent();
-                    }
-                    Integer colIndex = GridPane.getColumnIndex(clickedNode);
-                    Integer rowIndex = GridPane.getRowIndex(clickedNode);
-                    Vector2d clickedPosition = new Vector2d(colIndex - 1,
-                            this.mapGrid.getRowConstraints().size() - rowIndex - 1);
-
-                    Object clickedObject = this.engine.map.objectAt(clickedPosition);
-                    this.trackCLickedAnimal(clickedObject);
+        this.mapGrid.getChildren().forEach(item -> item.setOnMouseClicked(event -> {
+            if(this.isPaused) {
+                Node clickedNode = event.getPickResult().getIntersectedNode();
+                Node parent = clickedNode.getParent();
+                while(parent != this.mapGrid) {
+                    clickedNode = parent;
+                    parent = clickedNode.getParent();
                 }
-            });
-        });
+                Integer colIndex = GridPane.getColumnIndex(clickedNode);
+                Integer rowIndex = GridPane.getRowIndex(clickedNode);
+                Vector2d clickedPosition = new Vector2d(colIndex - 1,
+                        this.mapGrid.getRowConstraints().size() - rowIndex - 1);
+
+                Object clickedObject = this.engine.map.objectAt(clickedPosition);
+                this.trackCLickedAnimal(clickedObject);
+            }
+        }));
     }
 
     public void trackCLickedAnimal(Object clickedObject) {
@@ -252,9 +249,7 @@ public class MapGui implements IMapObserver {
                     this.trackedAnimalVBox = new VBox(selectedAnimalGenotype, numberOfChildren, numberOfDescendant, deathAge);
                     Scene animalScene = new Scene(this.trackedAnimalVBox, 400, 200);
                     animalStage.setScene(animalScene);
-                    animalStage.setOnCloseRequest(event -> {
-                        this.trackedAnimal = null;
-                    });
+                    animalStage.setOnCloseRequest(event -> this.trackedAnimal = null);
                     animalStage.setTitle("Śledzone zwierzę (" + this.name + ")");
                     animalStage.show();
                 }

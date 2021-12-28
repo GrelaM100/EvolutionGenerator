@@ -92,31 +92,31 @@ public class Animal implements IMapElement, Comparable<Animal> {
 
     public void move(MoveDirection moveDirection) {
         Vector2d newPosition;
-        switch(moveDirection) {
-            case ROTATE:
+        switch (moveDirection) {
+            case ROTATE -> {
                 int rotations = this.genotype.chooseRandomGen();
-                for(int i = 0; i < rotations; i++) {
+                for (int i = 0; i < rotations; i++) {
                     this.direction = this.direction.next();
                 }
-                break;
-            case FORWARD:
-                 newPosition = this.position.add(direction.toUnitVector());
-                if(map.canMoveTo(newPosition)) {
-                    if(this.map instanceof MapNoBorders) {
+            }
+            case FORWARD -> {
+                newPosition = this.position.add(direction.toUnitVector());
+                if (map.canMoveTo(newPosition)) {
+                    if (this.map instanceof MapNoBorders) {
                         newPosition = teleportWithNoBorder(newPosition);
                     }
                     this.position = newPosition;
                 }
-                break;
-            case BACKWARD:
+            }
+            case BACKWARD -> {
                 newPosition = this.position.subtract(direction.toUnitVector());
-                if(map.canMoveTo(newPosition)) {
-                    if(this.map instanceof MapNoBorders) {
+                if (map.canMoveTo(newPosition)) {
+                    if (this.map instanceof MapNoBorders) {
                         newPosition = teleportWithNoBorder(newPosition);
                     }
                     this.position = newPosition;
                 }
-                break;
+            }
         }
     }
 
